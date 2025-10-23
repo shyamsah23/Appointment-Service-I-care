@@ -29,6 +29,7 @@ public class SecurityConfig {
                         auth.requestMatchers(request -> secretHeaderKey.equals(request.getHeader("X-Secret-key"))).permitAll()
                                 .requestMatchers("/v3/**").permitAll()
                                 .requestMatchers("/swagger-ui/**").permitAll()
+                                .requestMatchers("/actuator/**").permitAll()
                                 .anyRequest().denyAll()
                 );
         return httpSecurity.build();

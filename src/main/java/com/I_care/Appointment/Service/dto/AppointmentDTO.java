@@ -1,5 +1,6 @@
 package com.I_care.Appointment.Service.dto;
 
+import com.I_care.Appointment.Service.entity.Appointment;
 import com.I_care.Appointment.Service.enums.Status;
 
 import java.time.LocalDateTime;
@@ -25,6 +26,10 @@ public class AppointmentDTO {
         this.status = status;
         this.reason = reason;
         this.notes = notes;
+    }
+
+    public Appointment toEntity(){
+        return new Appointment(this.id,this.patientId,this.doctorId,this.appointmentDate,this.status,this.reason,this.notes);
     }
 
     public Long getId() {

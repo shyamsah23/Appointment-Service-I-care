@@ -18,5 +18,9 @@ spring:
 server:
   port: ${SERVER_PORT}
 
+secret:
+  header:
+    key: ${SECRET_HEADER_KEY}
+
 
 
