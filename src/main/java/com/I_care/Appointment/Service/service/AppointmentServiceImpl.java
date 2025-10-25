@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
@@ -34,7 +35,7 @@ public class AppointmentServiceImpl implements AppointmentService {
 
     @Autowired
     private ProfileFeignClient profileFeignClient;
-
+    @Transactional
     @Override
     public Long scheduleAppointment(AppointmentDTO appointmentDTO) {
         logger.info("Schedule Appointment Started for Patient Id= {}", appointmentDTO.getPatientId());
