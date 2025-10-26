@@ -1,6 +1,7 @@
 package com.I_care.Appointment.Service.controller;
 
 import com.I_care.Appointment.Service.dto.AppointmentDTO;
+import com.I_care.Appointment.Service.dto.AppointmentDetails;
 import com.I_care.Appointment.Service.entity.Appointment;
 import com.I_care.Appointment.Service.exception.AppointmentException;
 import com.I_care.Appointment.Service.service.AppointmentServiceImpl;
@@ -42,18 +43,23 @@ public class AppointmentController {
     public ResponseEntity<Appointment> cancelAppointment(@RequestBody AppointmentDTO appointmentDTO,
                                                          @PathVariable Long appointmentId) throws AppointmentException {
         logger.info("Inside Controller - Started Cancelling Appointment for Appointment Id = {}", appointmentId);
-        Appointment updatedAppointment =appointmentService.cancelAppointment(appointmentId,appointmentDTO.getReason());
+        Appointment updatedAppointment = appointmentService.cancelAppointment(appointmentId, appointmentDTO.getReason());
         logger.info("Appointment Cancelled Successfully");
         return new ResponseEntity<>(updatedAppointment, HttpStatus.OK);
 
     }
 
     @PostMapping("/schedule")
-    public ResponseEntity<Long> scheduleAppointment(@RequestBody AppointmentDTO appointmentDTO) {
-        logger.info("Inside Controller - Started Scheduling appointment for Patient Id = {} ",appointmentDTO.getPatientId());
+    public ResponseEntity<Long> scheduleAppointment(@RequestBody AppointmentDTO appointmentDTO) throws AppointmentException {
+        logger.info("Inside Controller - Started Scheduling appointment for Patient Id = {} ", appointmentDTO.getPatientId());
         Long appointmentScheduleId = appointmentService.scheduleAppointment(appointmentDTO);
-        logger.info("Appointment is Successfully with Appointment Id = {}",appointmentScheduleId);
-        return new ResponseEntity<>(appointmentScheduleId,HttpStatus.CREATED);
+        logger.info("Appointment is Successfully with Appointment Id = {}", appointmentScheduleId);
+        return new ResponseEntity<>(appointmentScheduleId, HttpStatus.CREATED);
 
+    }
+
+    @GetMapping("/details/{appointmentId}")
+    public ResponseEntity<AppointmentDetails> getAppointmentDetailsWithName(@PathVariable Long appointmentId) throws AppointmentException {
+        return new ResponseEntity<>(appointmentService.getAppointmentDetailsWithName(appointmentId), HttpStatus.OK);
     }
 }
