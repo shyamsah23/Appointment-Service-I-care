@@ -4,7 +4,7 @@ enum Status {
     COMPLETED
 }
 
-type Appointment {
+type AppointmentDTO {
     id: ID,
     patientId: ID,
     doctorId: ID,
@@ -15,5 +15,5 @@ type Appointment {
 }
 
 type Query {
-    getAppointmentById(id: ID!) : Appointment
+    getAppointmentById(id: ID!) : AppointmentDTO
 }
