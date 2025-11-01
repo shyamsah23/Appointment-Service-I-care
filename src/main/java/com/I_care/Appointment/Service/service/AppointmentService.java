@@ -17,7 +17,9 @@ public interface AppointmentService {
 
     Appointment rescheduleAppointment(Long appointmentId, LocalDateTime newDateAndTime, String reasonForReschedule) throws AppointmentException;
 
-    Appointment getAppointmentDetails(Long appointmentId) throws AppointmentException;
+    AppointmentDTO getAppointmentDetails(Long appointmentId) throws AppointmentException;
+
+    Boolean publishMessage(String message);
 
     AppointmentDetails getAppointmentDetailsWithName(Long appointmentId) throws AppointmentException;
 }

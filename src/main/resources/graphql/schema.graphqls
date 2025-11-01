@@ -1,0 +1,19 @@
+enum Status {
+    SCHEDULED,
+    CANCEL,
+    COMPLETED
+}
+
+type AppointmentDTO {
+    id: ID,
+    patientId: ID,
+    doctorId: ID,
+    appointmentDate: String,
+    status: Status,
+    reason: String,
+    notes: String
+}
+
+type Query {
+    getAppointmentById(id: ID!) : AppointmentDTO
+}
