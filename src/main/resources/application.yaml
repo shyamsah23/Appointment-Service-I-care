@@ -20,6 +20,13 @@ spring:
     producer:
       bootstrap-server: localhost:9092
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
+  #Consumer Config
+    consumer:
+      bootstrap-server: localhost:9092
+      group-id: group1
+      auto-offset-reset: earliest
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
 
 server:
   port: ${SERVER_PORT}

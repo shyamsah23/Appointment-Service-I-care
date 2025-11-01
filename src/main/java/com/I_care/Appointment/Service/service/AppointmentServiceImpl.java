@@ -124,7 +124,7 @@ public class AppointmentServiceImpl implements AppointmentService {
     public Boolean publishMessage(String message) {
         logger.info("Stared Sending Message to Topic = {} ",AppointmentConstant.KAFKA_TEST_TOPIC);
         // Printing Message in case of Failure
-        logger.info("Messgae = {}",message);
+//        logger.info("Messgae = {}",message);
         kafkaTemplate.send(AppointmentConstant.KAFKA_TEST_TOPIC,message);
         logger.info("Message Sent Successfully ");
         return true;

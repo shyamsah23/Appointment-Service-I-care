@@ -5,4 +5,5 @@ public class AppointmentConstant {
     public static final String APPOINTMENT_NOT_FOUND = "Appointment Not Found!";
     public static final String APPOINTMENT_ALREADY_CANCELLED = "Appointment Already Cancelled";
     public static final String KAFKA_TEST_TOPIC = "test-mail";
+    public static final String GROUP_ID="group1";
 }
