@@ -56,7 +56,7 @@ public class AppointmentController {
         return new ResponseEntity<>(appointmentScheduleId,HttpStatus.CREATED);
     }
 
-    @GetMapping
+    @GetMapping("/message/publish/test")
     public Boolean sendMessageToTestTopic() {
         logger.info("Started Publishing the message to the topic -> Inside controller");
         appointmentService.publishMessage("Mail data");
