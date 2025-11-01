@@ -25,4 +25,11 @@ public class AppointmentGraphQLController {
         logger.info("Appointment fetched Successfully for appointment Id = {}",id);
         return appointmentDetails;
     }
+//    Dummy Data to test the above graphql endpoint
+//    {
+//        "query": "query GetAppointmentById($id: ID!){ getAppointmentById(id: $id){ appointmentDate } }",
+//            "variables": { "id": 12 },
+//        "operationName": "GetAppointmentById"
+//    }
+
 }
