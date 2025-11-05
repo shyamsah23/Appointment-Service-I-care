@@ -1,5 +1,6 @@
 package com.I_care.Appointment.Service.entity;
 
+import com.I_care.Appointment.Service.dto.AppointmentDTO;
 import com.I_care.Appointment.Service.enums.Status;
 import jakarta.persistence.*;
 
@@ -106,5 +107,9 @@ public class Appointment {
                 ", reason='" + reason + '\'' +
                 ", notes='" + notes + '\'' +
                 '}';
+    }
+
+    public AppointmentDTO toDTO(){
+        return new AppointmentDTO(this.id,this.patientId,this.doctorId,this.appointmentDate,this.status,this.reason,this.notes);
     }
 }

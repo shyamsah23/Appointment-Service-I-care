@@ -12,6 +12,7 @@ import com.I_care.Appointment.Service.utility.NotificationConstant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,6 +35,11 @@ public class AppointmentServiceImpl implements AppointmentService {
 
     @Autowired
     private ProfileFeignClient profileFeignClient;
+
+    @Autowired
+    private KafkaTemplate<String,String> kafkaTemplate;
+
+
 
     @Transactional
     @Override
@@ -118,12 +124,22 @@ public class AppointmentServiceImpl implements AppointmentService {
     }
 
     @Override
-    public Appointment getAppointmentDetails(Long appointmentId) throws AppointmentException {
+    public AppointmentDTO getAppointmentDetails(Long appointmentId) throws AppointmentException {
         logger.info("Started Fetching Appointment Details for Appointment Id = {}", appointmentId);
         Appointment appointment = appointmentRepository.findById(appointmentId).orElseThrow(() ->
                 new AppointmentException(AppointmentConstant.APPOINTMENT_NOT_FOUND));
         logger.info("Appointment fetched Successfully");
-        return appointment;
+        return appointment.toDTO();
+    }
+
+    @Override
+    public Boolean publishMessage(String message) {
+        logger.info("Stared Sending Message to Topic = {} ",AppointmentConstant.KAFKA_TEST_TOPIC);
+        // Printing Message in case of Failure
+//        logger.info("Messgae = {}",message);
+        kafkaTemplate.send(AppointmentConstant.KAFKA_TEST_TOPIC,message);
+        logger.info("Message Sent Successfully ");
+        return true;
     }
 
     @Override

@@ -14,6 +14,21 @@ spring:
       ddl-auto: update
     show: true
 
+# kafka Config
+  #Producer config
+  kafka:
+    enabled: ${KAFKA_ENABLED:false}   # Set KAFKA_ENABLED : true in Env to enable Kafka
+    producer:
+      bootstrap-server: localhost:9092
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+  #Consumer Config
+    consumer:
+      bootstrap-server: localhost:9092
+      group-id: group1
+      auto-offset-reset: earliest
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+
 server:
   port: ${SERVER_PORT}
 
@@ -21,9 +36,20 @@ secret:
   header:
     key: ${SECRET_HEADER_KEY}
 
+# To-Do :- Make this eureka Configurable
 eureka:
   client:
     service-url:
       defaultZone: http://localhost:8761/eureka/
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,circuitbreakers
+
+
+
+
 
 

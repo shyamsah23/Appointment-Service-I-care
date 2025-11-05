@@ -22,11 +22,11 @@ public class AppointmentController {
     private AppointmentServiceImpl appointmentService;
 
     @GetMapping("/{appointmentId}")
-    public ResponseEntity<Appointment> getAppointmentById(@PathVariable Long appointmentId) throws AppointmentException {
+    public ResponseEntity<AppointmentDTO> getAppointmentById(@PathVariable Long appointmentId) throws AppointmentException {
         logger.info("Inside Controller -> Started Fetching Appointment Details for Appointment Id = {}", appointmentId);
-        Appointment appointment = appointmentService.getAppointmentDetails(appointmentId);
+        AppointmentDTO appointmentInfo = appointmentService.getAppointmentDetails(appointmentId);
         logger.info("Successfully Found Appointment Details");
-        return new ResponseEntity<>(appointment, HttpStatus.OK);
+        return new ResponseEntity<>(appointmentInfo, HttpStatus.OK);
     }
 
     @PutMapping("/reschedule/{appointmentId}")
@@ -53,9 +53,16 @@ public class AppointmentController {
     public ResponseEntity<Long> scheduleAppointment(@RequestBody AppointmentDTO appointmentDTO) throws AppointmentException {
         logger.info("Inside Controller - Started Scheduling appointment for Patient Id = {} ", appointmentDTO.getPatientId());
         Long appointmentScheduleId = appointmentService.scheduleAppointment(appointmentDTO);
-        logger.info("Appointment is Successfully with Appointment Id = {}", appointmentScheduleId);
-        return new ResponseEntity<>(appointmentScheduleId, HttpStatus.CREATED);
+        logger.info("Appointment is Successfully with Appointment Id = {}",appointmentScheduleId);
+        return new ResponseEntity<>(appointmentScheduleId,HttpStatus.CREATED);
+    }
 
+    @GetMapping("/message/publish/test")
+    public Boolean sendMessageToTestTopic() {
+        logger.info("Started Publishing the message to the topic -> Inside controller");
+        appointmentService.publishMessage("Mail data");
+        logger.info("Successfully sended the messgae to the Topic");
+        return true;
     }
 
     @GetMapping("/details/{appointmentId}")
