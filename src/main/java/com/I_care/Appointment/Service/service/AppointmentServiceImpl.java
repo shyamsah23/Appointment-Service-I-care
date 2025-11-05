@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 
 @Service
+@Transactional
 public class AppointmentServiceImpl implements AppointmentService {
 
     Logger logger = LoggerFactory.getLogger(AppointmentServiceImpl.class);

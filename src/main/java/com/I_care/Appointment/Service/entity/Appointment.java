@@ -6,14 +6,17 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
+@Table(
+        name = "Appointment",
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = {"doctorId", "patientId", "appointmentDate"})
+        }
+)
 public class Appointment {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(unique = true)
     private Long patientId;
-    @Column(unique = true)
     private Long doctorId;
     private LocalDateTime appointmentDate;
     private Status status;
@@ -31,6 +34,9 @@ public class Appointment {
     }
 
     public Appointment() {
+    }
+    public Appointment(Long id){
+        this.id=id;
     }
 
     public Long getId() {

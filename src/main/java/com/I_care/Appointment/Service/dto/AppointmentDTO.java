@@ -6,7 +6,6 @@ import com.I_care.Appointment.Service.enums.Status;
 import java.time.LocalDateTime;
 
 public class AppointmentDTO {
-
     private Long id;
     private Long patientId;
     private Long doctorId;
