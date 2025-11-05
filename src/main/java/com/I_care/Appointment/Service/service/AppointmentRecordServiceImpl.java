@@ -14,7 +14,7 @@ import java.util.Optional;
 
 @Service
 @Transactional
-public class AppointmentRecordServiceImpl implements AppointmentRecordService{
+public class AppointmentRecordServiceImpl implements AppointmentRecordService {
     @Autowired
     AppointmentRecordRepository appointmentRecordRepository;
 
@@ -22,13 +22,13 @@ public class AppointmentRecordServiceImpl implements AppointmentRecordService{
     PrescriptionService prescriptionService;
 
     @Override
-    public Long createAppointmentRecord(AppointmentRecordDTO request) throws AppointmentException{
-        Optional<AppointmentRecord> existingRecord= appointmentRecordRepository.findByAppointment_Id(request.getAppointmentId());
-        if(existingRecord.isPresent()){
+    public Long createAppointmentRecord(AppointmentRecordDTO request) throws AppointmentException {
+        Optional<AppointmentRecord> existingRecord = appointmentRecordRepository.findByAppointment_Id(request.getAppointmentId());
+        if (existingRecord.isPresent()) {
             throw new AppointmentException(AppointmentConstant.APPOINTMENT_RECORD_ALREADY_EXISTS);
         }
-        Long id=appointmentRecordRepository.save(request.toEntity()).getId();
-        if(request.getPrescriptionDTO()!=null){
+        Long id = appointmentRecordRepository.save(request.toEntity()).getId();
+        if (request.getPrescriptionDTO() != null) {
             request.getPrescriptionDTO().setAppointmentId(request.getAppointmentId());
             prescriptionService.savePrescription(request.getPrescriptionDTO());
         }
@@ -36,8 +36,8 @@ public class AppointmentRecordServiceImpl implements AppointmentRecordService{
     }
 
     @Override
-    public void updateAppointmentRecord(AppointmentRecordDTO request) throws AppointmentException{
-        AppointmentRecord existingRecord= appointmentRecordRepository.findById(request.getId()).orElseThrow(()-> new AppointmentException(AppointmentConstant.APPOINTMENT_RECORD_DOES_NOT_EXIST));
+    public void updateAppointmentRecord(AppointmentRecordDTO request) throws AppointmentException {
+        AppointmentRecord existingRecord = appointmentRecordRepository.findById(request.getId()).orElseThrow(() -> new AppointmentException(AppointmentConstant.APPOINTMENT_RECORD_DOES_NOT_EXIST));
         existingRecord.setNotes(request.getNotes());
         existingRecord.setDiagnosis(request.getDiagnosis());
         existingRecord.setFollowUpDate(request.getFollowUpDate());
@@ -48,20 +48,20 @@ public class AppointmentRecordServiceImpl implements AppointmentRecordService{
     }
 
     @Override
-    public AppointmentRecordDTO getAppointmentRecordByAppointmentId(Long appointmentId) throws AppointmentException{
-         return appointmentRecordRepository.findByAppointment_Id(appointmentId).orElseThrow(()->new AppointmentException(AppointmentConstant.APPOINTMENT_RECORD_DOES_NOT_EXIST)).toDTO();
+    public AppointmentRecordDTO getAppointmentRecordByAppointmentId(Long appointmentId) throws AppointmentException {
+        return appointmentRecordRepository.findByAppointment_Id(appointmentId).orElseThrow(() -> new AppointmentException(AppointmentConstant.APPOINTMENT_RECORD_DOES_NOT_EXIST)).toDTO();
     }
 
     @Override
     public AppointmentRecordDTO getAppointmentRecordDetailsByAppointmentId(Long appointmentId) throws AppointmentException {
-        AppointmentRecordDTO record=appointmentRecordRepository.findByAppointment_Id(appointmentId).orElseThrow(()->new AppointmentException(AppointmentConstant.APPOINTMENT_RECORD_DOES_NOT_EXIST)).toDTO();
+        AppointmentRecordDTO record = appointmentRecordRepository.findByAppointment_Id(appointmentId).orElseThrow(() -> new AppointmentException(AppointmentConstant.APPOINTMENT_RECORD_DOES_NOT_EXIST)).toDTO();
         record.setPrescriptionDTO(prescriptionService.getPrescriptionByAppointmentId(appointmentId));
         return record;
     }
 
     @Override
-    public AppointmentRecordDTO getAppointmentRecordById(Long recordId) throws AppointmentException{
-        return appointmentRecordRepository.findById(recordId).orElseThrow(()->new ArithmeticException(AppointmentConstant.APPOINTMENT_RECORD_DOES_NOT_EXIST)).toDTO();
+    public AppointmentRecordDTO getAppointmentRecordById(Long recordId) throws AppointmentException {
+        return appointmentRecordRepository.findById(recordId).orElseThrow(() -> new ArithmeticException(AppointmentConstant.APPOINTMENT_RECORD_DOES_NOT_EXIST)).toDTO();
     }
 
 }

@@ -34,12 +34,13 @@ public class AppointmentRecordDTO {
         this.tests = tests;
         this.notes = notes;
         this.referral = referral;
-        this.prescriptionDTO=prescriptionDTO;
+        this.prescriptionDTO = prescriptionDTO;
         this.followUpDate = followUpDate;
         this.createdAt = createdAt;
     }
 
-    public AppointmentRecordDTO(){}
+    public AppointmentRecordDTO() {
+    }
 
     public String getDiagnosis() {
         return diagnosis;
@@ -137,7 +138,7 @@ public class AppointmentRecordDTO {
         this.createdAt = createdAt;
     }
 
-    public AppointmentRecord toEntity(){
-        return new AppointmentRecord(this.id,this.patientId,this.doctorId,new Appointment(this.appointmentId), StringListConverter.convertListToString(this.symptoms),this.diagnosis,StringListConverter.convertListToString(this.tests),this.notes,this.referral,this.followUpDate,this.createdAt);
+    public AppointmentRecord toEntity() {
+        return new AppointmentRecord(this.id, this.patientId, this.doctorId, new Appointment(this.appointmentId), StringListConverter.convertListToString(this.symptoms), this.diagnosis, StringListConverter.convertListToString(this.tests), this.notes, this.referral, this.followUpDate, this.createdAt);
     }
 }

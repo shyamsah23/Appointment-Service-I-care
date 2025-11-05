@@ -37,8 +37,7 @@ public class AppointmentServiceImpl implements AppointmentService {
     private ProfileFeignClient profileFeignClient;
 
     @Autowired
-    private KafkaTemplate<String,String> kafkaTemplate;
-
+    private KafkaTemplate<String, String> kafkaTemplate;
 
 
     @Transactional
@@ -134,16 +133,16 @@ public class AppointmentServiceImpl implements AppointmentService {
 
     @Override
     public Boolean publishMessage(String message) {
-        logger.info("Stared Sending Message to Topic = {} ",AppointmentConstant.KAFKA_TEST_TOPIC);
+        logger.info("Stared Sending Message to Topic = {} ", AppointmentConstant.KAFKA_TEST_TOPIC);
         // Printing Message in case of Failure
 //        logger.info("Messgae = {}",message);
-        kafkaTemplate.send(AppointmentConstant.KAFKA_TEST_TOPIC,message);
+        kafkaTemplate.send(AppointmentConstant.KAFKA_TEST_TOPIC, message);
         logger.info("Message Sent Successfully ");
         return true;
     }
 
     @Override
-    public AppointmentDetails getAppointmentDetailsWithName(Long appointmentId) throws AppointmentException {
+    public AppointmentDetails getAppointmentDetailsWithId(Long appointmentId) throws AppointmentException {
         logger.info("Trying to fetch details for appointment with id={}", appointmentId);
         Appointment appointment = appointmentRepository.findById(appointmentId).orElseThrow(() -> new AppointmentException(AppointmentConstant.APPOINTMENT_NOT_FOUND));
         logger.info("Appointment details fetched! Now trying to fetch doctor & patient details based on appointment details");

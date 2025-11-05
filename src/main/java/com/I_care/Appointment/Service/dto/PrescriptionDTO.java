@@ -13,9 +13,10 @@ public class PrescriptionDTO {
     private Long appointmentId;
     private LocalDate prescriptionDate;
     private String notes;
-    private List<MedicineDTO>medicines;
+    private List<MedicineDTO> medicines;
 
-    public PrescriptionDTO(){}
+    public PrescriptionDTO() {
+    }
 
     public PrescriptionDTO(Long id, Long patientId, Long doctorId, Long appointmentId, LocalDate prescriptionDate, String notes, List<MedicineDTO> medicines) {
         this.id = id;
@@ -83,7 +84,7 @@ public class PrescriptionDTO {
         this.medicines = medicines;
     }
 
-    public Prescription toEntity(){
-        return new Prescription(this.id,this.patientId,this.doctorId,new Appointment(this.appointmentId),this.prescriptionDate,this.notes);
+    public Prescription toEntity() {
+        return new Prescription(this.id, this.patientId, this.doctorId, new Appointment(this.appointmentId), this.prescriptionDate, this.notes);
     }
 }

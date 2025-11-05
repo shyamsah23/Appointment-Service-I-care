@@ -30,12 +30,12 @@ public class AppointmentRecordController {
     }
 
     @GetMapping("/getByAppointmentId/{appointmentId}")
-    public ResponseEntity<AppointmentRecordDTO> getAppointmentRecordByAppointmentId(@PathVariable Long appointmentId) throws AppointmentException{
-        return new ResponseEntity<>(appointmentRecordService.getAppointmentRecordByAppointmentId(appointmentId),HttpStatus.OK);
+    public ResponseEntity<AppointmentRecordDTO> getAppointmentRecordByAppointmentId(@PathVariable Long appointmentId) throws AppointmentException {
+        return new ResponseEntity<>(appointmentRecordService.getAppointmentRecordByAppointmentId(appointmentId), HttpStatus.OK);
     }
 
-    @GetMapping("/getByAppointmentId/{recordId}")
-    public ResponseEntity<AppointmentRecordDTO> getAppointmentRecordById(@PathVariable Long recordId) throws AppointmentException{
-        return new ResponseEntity<>(appointmentRecordService.getAppointmentRecordById(recordId),HttpStatus.OK);
+    @GetMapping("/getByRecordId/{recordId}")
+    public ResponseEntity<AppointmentRecordDTO> getAppointmentRecordById(@PathVariable Long recordId) throws AppointmentException {
+        return new ResponseEntity<>(appointmentRecordService.getAppointmentRecordById(recordId), HttpStatus.OK);
     }
 }

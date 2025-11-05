@@ -7,6 +7,8 @@ import java.util.List;
 
 public interface MedicineService {
     public Long saveMedicine(MedicineDTO medicineDTO);
+
     public List<MedicineDTO> saveAllMedicines(List<MedicineDTO> ListOfMedicines);
+
     public List<MedicineDTO> getMedicinesByPrescriptionId(Long prescriptionId);
 }

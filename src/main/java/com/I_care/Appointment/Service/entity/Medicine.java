@@ -7,6 +7,7 @@ import java.time.LocalDate;
 
 @Entity
 public class Medicine {
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
@@ -18,7 +19,7 @@ public class Medicine {
     private String route; // oral injection
     private String instructions;
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="prescription_id")
+    @JoinColumn(name = "prescription_id")
     private Prescription prescription;
 
     public Medicine(Long id, String name, Long medicineId, String dosage, String frequency, Integer duration, String type, String route, String instructions, Prescription prescription) {
@@ -114,7 +115,7 @@ public class Medicine {
         this.instructions = instructions;
     }
 
-    public MedicineDTO toDTO(){
-        return new MedicineDTO(this.id,this.name,this.medicineId,this.dosage,this.frequency,this.duration, this.type,this.route,this.instructions, this.prescription.getId());
+    public MedicineDTO toDTO() {
+        return new MedicineDTO(this.id, this.name, this.medicineId, this.dosage, this.frequency, this.duration, this.type, this.route, this.instructions, this.prescription.getId());
     }
 }

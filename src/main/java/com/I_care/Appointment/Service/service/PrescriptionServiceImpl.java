@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @Transactional
-public class PrescriptionServiceImpl implements PrescriptionService{
+public class PrescriptionServiceImpl implements PrescriptionService {
     @Autowired
     PrescriptionRepository prescriptionRepository;
 
@@ -18,9 +18,9 @@ public class PrescriptionServiceImpl implements PrescriptionService{
     MedicineService medicineService;
 
     @Override
-    public Long savePrescription(PrescriptionDTO prescriptionDTO){
-        Long prescriptionId=prescriptionRepository.save(prescriptionDTO.toEntity()).getId();
-        prescriptionDTO.getMedicines().forEach(medicine->{
+    public Long savePrescription(PrescriptionDTO prescriptionDTO) {
+        Long prescriptionId = prescriptionRepository.save(prescriptionDTO.toEntity()).getId();
+        prescriptionDTO.getMedicines().forEach(medicine -> {
             medicine.setPrescriptionId(prescriptionId);
         });
         medicineService.saveAllMedicines(prescriptionDTO.getMedicines());
@@ -28,14 +28,14 @@ public class PrescriptionServiceImpl implements PrescriptionService{
     }
 
     @Override
-    public PrescriptionDTO getPrescriptionByAppointmentId(Long appointmentId) throws AppointmentException{
-        PrescriptionDTO prescriptionDTO= prescriptionRepository.findByAppointment_Id(appointmentId).orElseThrow(()->new AppointmentException(AppointmentConstant.PRESCRIPTION_NOT_FOUND)).toDTO();
+    public PrescriptionDTO getPrescriptionByAppointmentId(Long appointmentId) throws AppointmentException {
+        PrescriptionDTO prescriptionDTO = prescriptionRepository.findByAppointment_Id(appointmentId).orElseThrow(() -> new AppointmentException(AppointmentConstant.PRESCRIPTION_NOT_FOUND)).toDTO();
         return prescriptionDTO;
     }
 
     @Override
-    public PrescriptionDTO getPrescriptionById(Long prescriptionId) throws AppointmentException{
-        PrescriptionDTO prescriptionDTO=prescriptionRepository.findById(prescriptionId).orElseThrow(()->new AppointmentException(AppointmentConstant.PRESCRIPTION_NOT_FOUND)).toDTO();
+    public PrescriptionDTO getPrescriptionById(Long prescriptionId) throws AppointmentException {
+        PrescriptionDTO prescriptionDTO = prescriptionRepository.findById(prescriptionId).orElseThrow(() -> new AppointmentException(AppointmentConstant.PRESCRIPTION_NOT_FOUND)).toDTO();
         prescriptionDTO.setMedicines(medicineService.getMedicinesByPrescriptionId(prescriptionDTO.getId()));
         return prescriptionDTO;
     }

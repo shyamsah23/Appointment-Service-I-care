@@ -9,12 +9,13 @@ import java.time.LocalDateTime;
 
 @Entity
 public class Prescription {
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private Long patientId;
     private Long doctorId;
-    @OneToOne(fetch =FetchType.LAZY)
-    @JoinColumn(name="appointment_id")
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "appointment_id")
     private Appointment appointment;
     private LocalDate prescriptionDate;
     private String notes;
@@ -80,7 +81,7 @@ public class Prescription {
         this.notes = notes;
     }
 
-    public PrescriptionDTO toDTO(){
-        return new PrescriptionDTO(this.id,this.patientId,this.doctorId,this.appointment.getId(),this.prescriptionDate,this.notes,null);
+    public PrescriptionDTO toDTO() {
+        return new PrescriptionDTO(this.id, this.patientId, this.doctorId, this.appointment.getId(), this.prescriptionDate, this.notes, null);
     }
 }

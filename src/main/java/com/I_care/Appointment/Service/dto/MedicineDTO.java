@@ -108,7 +108,7 @@ public class MedicineDTO {
         this.prescriptionId = prescriptionId;
     }
 
-    public Medicine toEntity(){
-        return new Medicine(this.id,this.name,this.medicineId,this.dosage,this.frequency, this.duration,this.type,this.route,this.instructions,new Prescription(this.prescriptionId));
+    public Medicine toEntity() {
+        return new Medicine(this.id, this.name, this.medicineId, this.dosage, this.frequency, this.duration, this.type, this.route, this.instructions, new Prescription(this.prescriptionId));
     }
 }

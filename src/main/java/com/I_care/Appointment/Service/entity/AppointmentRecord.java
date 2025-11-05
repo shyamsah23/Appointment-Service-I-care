@@ -14,7 +14,7 @@ public class AppointmentRecord {
     private Long patientId;
     private Long doctorId;
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="appointment_id")
+    @JoinColumn(name = "appointment_id")
     private Appointment appointment;
     private String symptoms;
     private String diagnosis;
@@ -24,7 +24,7 @@ public class AppointmentRecord {
     private LocalDateTime followUpDate;
     private LocalDateTime createdAt;
 
-    public AppointmentRecord(Long id, Long patientId,Long doctorId, Appointment appointment, String symptoms, String diagnosis, String tests, String referral, String notes, LocalDateTime followUpDate, LocalDateTime createdAt) {
+    public AppointmentRecord(Long id, Long patientId, Long doctorId, Appointment appointment, String symptoms, String diagnosis, String tests, String referral, String notes, LocalDateTime followUpDate, LocalDateTime createdAt) {
         this.id = id;
         this.patientId = patientId;
         this.doctorId = doctorId;
@@ -38,7 +38,8 @@ public class AppointmentRecord {
         this.createdAt = createdAt;
     }
 
-    public AppointmentRecord(){}
+    public AppointmentRecord() {
+    }
 
     public String getDiagnosis() {
         return diagnosis;
@@ -128,7 +129,7 @@ public class AppointmentRecord {
         this.createdAt = createdAt;
     }
 
-    public AppointmentRecordDTO toDTO(){
-        return new AppointmentRecordDTO(appointment.getId(), this.id,this.patientId,this.doctorId, StringListConverter.convertStringToList(this.symptoms),this.diagnosis,StringListConverter.convertStringToList(this.tests),this.notes,this.referral,null,this.followUpDate,this.createdAt);
+    public AppointmentRecordDTO toDTO() {
+        return new AppointmentRecordDTO(appointment.getId(), this.id, this.patientId, this.doctorId, StringListConverter.convertStringToList(this.symptoms), this.diagnosis, StringListConverter.convertStringToList(this.tests), this.notes, this.referral, null, this.followUpDate, this.createdAt);
     }
 }

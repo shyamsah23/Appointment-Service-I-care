@@ -21,5 +21,5 @@ public interface AppointmentService {
 
     Boolean publishMessage(String message);
 
-    AppointmentDetails getAppointmentDetailsWithName(Long appointmentId) throws AppointmentException;
+    AppointmentDetails getAppointmentDetailsWithId(Long appointmentId) throws AppointmentException;
 }

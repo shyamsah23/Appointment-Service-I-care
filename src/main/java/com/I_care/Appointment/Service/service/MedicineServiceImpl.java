@@ -11,7 +11,7 @@ import java.util.List;
 
 @Service
 @Transactional
-public class MedicineServiceImpl implements MedicineService{
+public class MedicineServiceImpl implements MedicineService {
     @Autowired
     MedicineRepository medicineRepository;
 
@@ -21,12 +21,12 @@ public class MedicineServiceImpl implements MedicineService{
     }
 
     @Override
-    public List<MedicineDTO> saveAllMedicines(List<MedicineDTO> listOfMedicines){
-        return ((List<Medicine>)medicineRepository.saveAll(listOfMedicines.stream().map(MedicineDTO::toEntity).toList())).stream().map(Medicine::toDTO).toList();
+    public List<MedicineDTO> saveAllMedicines(List<MedicineDTO> listOfMedicines) {
+        return ((List<Medicine>) medicineRepository.saveAll(listOfMedicines.stream().map(MedicineDTO::toEntity).toList())).stream().map(Medicine::toDTO).toList();
     }
 
     @Override
-    public List<MedicineDTO> getMedicinesByPrescriptionId(Long prescriptionId){
-        return( (List<Medicine>)medicineRepository.findAllByPrescription_Id(prescriptionId)).stream().map(Medicine :: toDTO).toList();
+    public List<MedicineDTO> getMedicinesByPrescriptionId(Long prescriptionId) {
+        return ((List<Medicine>) medicineRepository.findAllByPrescription_Id(prescriptionId)).stream().map(Medicine::toDTO).toList();
     }
 }

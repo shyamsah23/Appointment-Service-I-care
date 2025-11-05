@@ -36,8 +36,9 @@ public class Appointment {
 
     public Appointment() {
     }
-    public Appointment(Long id){
-        this.id=id;
+
+    public Appointment(Long id) {
+        this.id = id;
     }
 
     public Long getId() {
@@ -109,7 +110,7 @@ public class Appointment {
                 '}';
     }
 
-    public AppointmentDTO toDTO(){
-        return new AppointmentDTO(this.id,this.patientId,this.doctorId,this.appointmentDate,this.status,this.reason,this.notes);
+    public AppointmentDTO toDTO() {
+        return new AppointmentDTO(this.id, this.patientId, this.doctorId, this.appointmentDate, this.status, this.reason, this.notes);
     }
 }
