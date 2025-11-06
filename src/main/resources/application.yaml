@@ -1,4 +1,3 @@
-
 spring:
   application:
     name: Appointment-Service
@@ -6,7 +5,7 @@ spring:
   datasource:
     url: jdbc:mysql://localhost:3306/appointmentDB
     username: root
-    password: ${DB_PASSWORD}
+    password: ${DB_PASS}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
@@ -14,14 +13,14 @@ spring:
       ddl-auto: update
     show: true
 
-# kafka Config
+  # kafka Config
   #Producer config
   kafka:
     enabled: ${KAFKA_ENABLED:false}   # Set KAFKA_ENABLED : true in Env to enable Kafka
     producer:
       bootstrap-server: localhost:9092
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
-  #Consumer Config
+    #Consumer Config
     consumer:
       bootstrap-server: localhost:9092
       group-id: group1

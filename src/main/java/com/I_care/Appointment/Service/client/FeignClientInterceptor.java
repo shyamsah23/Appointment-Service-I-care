@@ -13,6 +13,6 @@ public class FeignClientInterceptor {
 
     @Bean
     public RequestInterceptor globalInterceptor() {
-        return requestTemplate -> requestTemplate.header("X-Secret-key", secretHeaderKey);
+        return requestTemplate -> requestTemplate.header("X-Secret-Key", secretHeaderKey);
     }
 }

@@ -6,10 +6,9 @@ import com.I_care.Appointment.Service.enums.Status;
 import java.time.LocalDateTime;
 
 public class AppointmentDTO {
-
     private Long id;
     private Long patientId;
-    private long doctorId;
+    private Long doctorId;
     private LocalDateTime appointmentDate;
     private Status status;
     private String reason;
@@ -18,7 +17,7 @@ public class AppointmentDTO {
     public AppointmentDTO() {
     }
 
-    public AppointmentDTO(Long id, Long patientId, long doctorId, LocalDateTime appointmentDate, Status status, String reason, String notes) {
+    public AppointmentDTO(Long id, Long patientId, Long doctorId, LocalDateTime appointmentDate, Status status, String reason, String notes) {
         this.id = id;
         this.patientId = patientId;
         this.doctorId = doctorId;
@@ -28,8 +27,8 @@ public class AppointmentDTO {
         this.notes = notes;
     }
 
-    public Appointment toEntity(){
-        return new Appointment(this.id,this.patientId,this.doctorId,this.appointmentDate,this.status,this.reason,this.notes);
+    public Appointment toEntity() {
+        return new Appointment(this.id, this.patientId, this.doctorId, this.appointmentDate, this.status, this.reason, this.notes);
     }
 
     public Long getId() {

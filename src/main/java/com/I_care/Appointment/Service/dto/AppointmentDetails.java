@@ -1,44 +1,42 @@
-package com.I_care.Appointment.Service.entity;
+package com.I_care.Appointment.Service.dto;
 
-import com.I_care.Appointment.Service.dto.AppointmentDTO;
+import com.I_care.Appointment.Service.entity.Appointment;
 import com.I_care.Appointment.Service.enums.Status;
-import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
 
-@Entity
-@Table(
-        name = "Appointment",
-        uniqueConstraints = {
-                @UniqueConstraint(columnNames = {"doctorId", "patientId", "appointmentDate"})
-        }
-)
-public class Appointment {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+public class AppointmentDetails {
     private Long id;
     private Long patientId;
     private Long doctorId;
+    private String doctorName;
+    private String patientName;
     private LocalDateTime appointmentDate;
     private Status status;
     private String reason;
     private String notes;
 
-    public Appointment(Long id, Long patientId, Long doctorId, LocalDateTime appointmentDate, Status status, String reason, String notes) {
+    public AppointmentDetails() {
+    }
+
+    public AppointmentDetails(Long id, Long patientId, Long doctorId, String doctorName, String patientName, LocalDateTime appointmentDate, Status status, String reason, String notes) {
         this.id = id;
         this.patientId = patientId;
         this.doctorId = doctorId;
+        this.doctorName = doctorName;
+        this.patientName = patientName;
         this.appointmentDate = appointmentDate;
         this.status = status;
         this.reason = reason;
         this.notes = notes;
     }
 
-    public Appointment() {
+    public String getDoctorName() {
+        return doctorName;
     }
 
-    public Appointment(Long id) {
-        this.id = id;
+    public void setDoctorName(String doctorName) {
+        this.doctorName = doctorName;
     }
 
     public Long getId() {
@@ -57,12 +55,20 @@ public class Appointment {
         this.patientId = patientId;
     }
 
-    public long getDoctorId() {
+    public Long getDoctorId() {
         return doctorId;
     }
 
-    public void setDoctorId(long doctorId) {
+    public void setDoctorId(Long doctorId) {
         this.doctorId = doctorId;
+    }
+
+    public String getPatientName() {
+        return patientName;
+    }
+
+    public void setPatientName(String patientName) {
+        this.patientName = patientName;
     }
 
     public LocalDateTime getAppointmentDate() {
@@ -97,20 +103,4 @@ public class Appointment {
         this.notes = notes;
     }
 
-    @Override
-    public String toString() {
-        return "Appointment{" +
-                "id=" + id +
-                ", patientId=" + patientId +
-                ", doctorId=" + doctorId +
-                ", appointmentDate=" + appointmentDate +
-                ", status=" + status +
-                ", reason='" + reason + '\'' +
-                ", notes='" + notes + '\'' +
-                '}';
-    }
-
-    public AppointmentDTO toDTO() {
-        return new AppointmentDTO(this.id, this.patientId, this.doctorId, this.appointmentDate, this.status, this.reason, this.notes);
-    }
 }

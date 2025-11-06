@@ -2,9 +2,7 @@ package com.I_care.Appointment.Service.service;
 
 import com.I_care.Appointment.Service.client.NotificationFeignClient;
 import com.I_care.Appointment.Service.client.ProfileFeignClient;
-import com.I_care.Appointment.Service.dto.AppointmentDTO;
-import com.I_care.Appointment.Service.dto.EmailDTO;
-import com.I_care.Appointment.Service.dto.PatientDTO;
+import com.I_care.Appointment.Service.dto.*;
 import com.I_care.Appointment.Service.entity.Appointment;
 import com.I_care.Appointment.Service.enums.Status;
 import com.I_care.Appointment.Service.exception.AppointmentException;
@@ -21,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 
 @Service
+@Transactional
 public class AppointmentServiceImpl implements AppointmentService {
 
     Logger logger = LoggerFactory.getLogger(AppointmentServiceImpl.class);
@@ -38,13 +37,25 @@ public class AppointmentServiceImpl implements AppointmentService {
     private ProfileFeignClient profileFeignClient;
 
     @Autowired
-    private KafkaTemplate<String,String> kafkaTemplate;
+    private KafkaTemplate<String, String> kafkaTemplate;
 
 
     @Transactional
     @Override
-    public Long scheduleAppointment(AppointmentDTO appointmentDTO) {
-        logger.info("Schedule Appointment Started for Patient Id= {}", appointmentDTO.getPatientId());
+    public Long scheduleAppointment(AppointmentDTO appointmentDTO) throws AppointmentException {
+        logger.info("Checks being performed for provided Doctor & patient with ids={},{} respectively", appointmentDTO.getDoctorId(), appointmentDTO.getPatientId());
+        Boolean doctorExists = profileFeignClient.doctorExists(appointmentDTO.getDoctorId());
+        if (doctorExists == null || !doctorExists) {
+            logger.info("Given doctor doesn't exist in our system with id={}", appointmentDTO.getDoctorId());
+            throw new AppointmentException(AppointmentConstant.DOCTOR_NOT_FOUND);
+        }
+        Boolean patientExists = profileFeignClient.patientExists(appointmentDTO.getPatientId());
+        if (patientExists == null || !patientExists) {
+            logger.info("Given patient doesn't exist in our system with id={}", appointmentDTO.getPatientId());
+            throw new AppointmentException(AppointmentConstant.PATIENT_NOT_FOUND);
+        }
+
+        logger.info("Checks performed! Schedule Appointment Started for Patient Id= {}", appointmentDTO.getPatientId());
         Long appointmentId = appointmentRepository.save(appointmentDTO.toEntity()).getId();
         logger.info("Appointment Schedule Successfully for Patient Id= {} and appointment Id= {}", appointmentDTO.getPatientId(), appointmentId);
         logger.info("Preparing data to send Email to patient");
@@ -56,7 +67,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         // To-Do : Use kafka to Send Mail
         logger.info("Started Sending mail To Patient");
         notificationFeignClient.sendMail(emailInfo);
-        logger.info("Successfully Sended the mail");
+        logger.info("Successfully Sent the mail");
         return appointmentId;
     }
 
@@ -122,11 +133,23 @@ public class AppointmentServiceImpl implements AppointmentService {
 
     @Override
     public Boolean publishMessage(String message) {
-        logger.info("Stared Sending Message to Topic = {} ",AppointmentConstant.KAFKA_TEST_TOPIC);
+        logger.info("Stared Sending Message to Topic = {} ", AppointmentConstant.KAFKA_TEST_TOPIC);
         // Printing Message in case of Failure
 //        logger.info("Messgae = {}",message);
-        kafkaTemplate.send(AppointmentConstant.KAFKA_TEST_TOPIC,message);
+        kafkaTemplate.send(AppointmentConstant.KAFKA_TEST_TOPIC, message);
         logger.info("Message Sent Successfully ");
         return true;
+    }
+
+    @Override
+    public AppointmentDetails getAppointmentDetailsWithId(Long appointmentId) throws AppointmentException {
+        logger.info("Trying to fetch details for appointment with id={}", appointmentId);
+        Appointment appointment = appointmentRepository.findById(appointmentId).orElseThrow(() -> new AppointmentException(AppointmentConstant.APPOINTMENT_NOT_FOUND));
+        logger.info("Appointment details fetched! Now trying to fetch doctor & patient details based on appointment details");
+        DoctorDTO doctorDTO = profileFeignClient.getDoctorById(appointment.getDoctorId());
+        logger.info("Doctor details fetched");
+        PatientDTO patientDTO = profileFeignClient.getPatientById(appointment.getPatientId());
+        logger.info("Patient details fetched! Ready to show data");
+        return new AppointmentDetails(appointment.getId(), appointment.getPatientId(), appointment.getDoctorId(), doctorDTO.getName(), patientDTO.getName(), appointment.getAppointmentDate(), appointment.getStatus(), appointment.getReason(), appointment.getNotes());
     }
 }

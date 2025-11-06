@@ -20,9 +20,9 @@ public class AppointmentGraphQLController {
 
     @QueryMapping
     public AppointmentDTO getAppointmentById(@Argument Long id) throws AppointmentException {
-        logger.info("GraphQL Call -> Fetching appointment Details for id = {}",id);
+        logger.info("GraphQL Call -> Fetching appointment Details for id = {}", id);
         AppointmentDTO appointmentDetails = appointmentService.getAppointmentDetails(id);
-        logger.info("Appointment fetched Successfully for appointment Id = {}",id);
+        logger.info("Appointment fetched Successfully for appointment Id = {}", id);
         return appointmentDetails;
     }
 //    Dummy Data to test the above graphql endpoint
