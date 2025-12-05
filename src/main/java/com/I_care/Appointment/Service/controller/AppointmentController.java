@@ -60,8 +60,8 @@ public class AppointmentController {
     @GetMapping("/message/publish/test")
     public Boolean sendMessageToTestTopic() {
         logger.info("Started Publishing the message to the topic -> Inside controller");
-        appointmentService.publishMessage("Mail data");
-        logger.info("Successfully sended the messgae to the Topic");
+        appointmentService.publishMessage("Kafka testing");
+        logger.info("Successfully sent the message to the Topic");
         return true;
     }
 
