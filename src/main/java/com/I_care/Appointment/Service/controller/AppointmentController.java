@@ -2,6 +2,7 @@ package com.I_care.Appointment.Service.controller;
 
 import com.I_care.Appointment.Service.dto.AppointmentDTO;
 import com.I_care.Appointment.Service.dto.AppointmentDetails;
+import com.I_care.Appointment.Service.dto.SlotDTO;
 import com.I_care.Appointment.Service.entity.Appointment;
 import com.I_care.Appointment.Service.exception.AppointmentException;
 import com.I_care.Appointment.Service.service.AppointmentServiceImpl;
@@ -11,6 +12,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
+import java.util.List;
 
 @RestController
 @RequestMapping("/appointment")
@@ -34,7 +38,7 @@ public class AppointmentController {
                                                              @PathVariable Long appointmentId) throws AppointmentException {
         logger.info("Inside Controller - Started Reschedule Appointment for Appointment Id = {}", appointmentId);
         Appointment updatedAppointment = appointmentService.rescheduleAppointment(appointmentId,
-                appointmentDTO.getAppointmentDate(), appointmentDTO.getReason());
+                appointmentDTO.getAppointmentDate(), appointmentDTO.getStartTime(), appointmentDTO.getReason());
         logger.info("Appointment Reschedule Successfully");
         return new ResponseEntity<>(updatedAppointment, HttpStatus.OK);
     }
@@ -65,8 +69,28 @@ public class AppointmentController {
         return true;
     }
 
+    @GetMapping("/details/allAppointments")
+    public ResponseEntity<List<AppointmentDTO>> getAllAppointments() throws AppointmentException {
+        return new ResponseEntity<>(appointmentService.getAllAppointments(), HttpStatus.OK);
+    }
+
     @GetMapping("/details/{appointmentId}")
     public ResponseEntity<AppointmentDetails> getAppointmentDetailsWithId(@PathVariable Long appointmentId) throws AppointmentException {
         return new ResponseEntity<>(appointmentService.getAppointmentDetailsWithId(appointmentId), HttpStatus.OK);
+    }
+
+    @GetMapping("/details/doctor/{doctorId}")
+    public ResponseEntity<List<AppointmentDTO>> getAllAppointmentDetailsByDoctorId(@PathVariable Long doctorId) throws AppointmentException {
+        return new ResponseEntity<>(appointmentService.getAppointmentsByDoctorId(doctorId), HttpStatus.OK);
+    }
+
+    @GetMapping("/details/patient/{patientId}")
+    public ResponseEntity<List<AppointmentDTO>> getAllAppointmentDetailsByPatientId(@PathVariable Long patientId) throws AppointmentException {
+        return new ResponseEntity<>(appointmentService.getAppointmentsByPatientId(patientId), HttpStatus.OK);
+    }
+
+    @GetMapping("/slots")
+    public ResponseEntity<List<SlotDTO>> getSlots(@RequestParam Long doctorId, @RequestParam String date) {
+        return ResponseEntity.ok(appointmentService.getSlots(doctorId, LocalDate.parse(date)));
     }
 }

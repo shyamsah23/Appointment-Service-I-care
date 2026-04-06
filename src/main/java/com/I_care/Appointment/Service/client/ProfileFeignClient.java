@@ -6,7 +6,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
-@FeignClient(value = "Profile-Service", url = "${PROFILE_SERVICE_URL}", configuration = FeignClientInterceptor.class)
+@FeignClient(value = "profile-service", configuration = FeignClientInterceptor.class)
 public interface ProfileFeignClient {
 
     @GetMapping("profile/patient/get/{id}")

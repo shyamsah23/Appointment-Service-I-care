@@ -16,7 +16,15 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -42,58 +50,102 @@ public class AppointmentServiceImpl implements AppointmentService {
 
     @Transactional
     @Override
-    public Long scheduleAppointment(AppointmentDTO appointmentDTO) throws AppointmentException {
-        logger.info("Checks being performed for provided Doctor & patient with ids={},{} respectively", appointmentDTO.getDoctorId(), appointmentDTO.getPatientId());
-        Boolean doctorExists = profileFeignClient.doctorExists(appointmentDTO.getDoctorId());
+    public Long scheduleAppointment(AppointmentDTO dto) throws AppointmentException {
+
+        logger.info("Validating doctor & patient");
+
+        Boolean doctorExists = profileFeignClient.doctorExists(dto.getDoctorId());
         if (doctorExists == null || !doctorExists) {
-            logger.info("Given doctor doesn't exist in our system with id={}", appointmentDTO.getDoctorId());
             throw new AppointmentException(AppointmentConstant.DOCTOR_NOT_FOUND);
         }
-        Boolean patientExists = profileFeignClient.patientExists(appointmentDTO.getPatientId());
+
+        Boolean patientExists = profileFeignClient.patientExists(dto.getPatientId());
         if (patientExists == null || !patientExists) {
-            logger.info("Given patient doesn't exist in our system with id={}", appointmentDTO.getPatientId());
             throw new AppointmentException(AppointmentConstant.PATIENT_NOT_FOUND);
         }
 
-        logger.info("Checks performed! Schedule Appointment Started for Patient Id= {}", appointmentDTO.getPatientId());
-        Long appointmentId = appointmentRepository.save(appointmentDTO.toEntity()).getId();
-        logger.info("Appointment Schedule Successfully for Patient Id= {} and appointment Id= {}", appointmentDTO.getPatientId(), appointmentId);
-        logger.info("Preparing data to send Email to patient");
+        // MAX 2 APPOINTMENTS PER DAY
+        long count = appointmentRepository
+                .countByDoctorIdAndPatientIdAndAppointmentDateAndStatus(
+                        dto.getDoctorId(),
+                        dto.getPatientId(),
+                        dto.getAppointmentDate(),
+                        Status.SCHEDULED
+                );
 
-        PatientDTO patientInfo = profileFeignClient.getPatientById(appointmentDTO.getPatientId());
-        logger.info("Patient Info Fetched with Patient id = {}", patientInfo.getId());
-        EmailDTO emailInfo = notificationServiceHelper.getNotificationDetails(appointmentDTO.getPatientId(), NotificationConstant.APPOINTMENT_BOOKED,
-                patientInfo.getEmail(), NotificationConstant.SCHEDULE_APPOINTMENT_SUBJECT);
-        // To-Do : Use kafka to Send Mail
-        logger.info("Started Sending mail To Patient");
+        if (count >= 2) {
+            throw new AppointmentException("Max 2 appointments per day allowed");
+        }
+
+        //  SLOT ALREADY BOOKED
+        boolean exists = appointmentRepository
+                .existsByDoctorIdAndAppointmentDateAndStartTimeAndStatus(
+                        dto.getDoctorId(),
+                        dto.getAppointmentDate(),
+                        dto.getStartTime(),
+                        Status.SCHEDULED
+                );
+
+        if (exists) {
+            throw new AppointmentException("Slot already booked");
+        }
+
+        Appointment appointment = new Appointment();
+        appointment.setDoctorId(dto.getDoctorId());
+        appointment.setPatientId(dto.getPatientId());
+        appointment.setAppointmentDate(dto.getAppointmentDate());
+        appointment.setStartTime(dto.getStartTime());
+        appointment.setEndTime(dto.getEndTime());
+        appointment.setStatus(Status.SCHEDULED);
+        appointment.setReason(dto.getReason());
+        appointment.setPaid(true);
+        appointment.setRefunded(false);
+
+        appointmentRepository.save(appointment);
+
+        logger.info("Appointment created successfully");
+
+        PatientDTO patientInfo = profileFeignClient.getPatientById(dto.getPatientId());
+
+        EmailDTO emailInfo = notificationServiceHelper.getNotificationDetails(
+                dto.getPatientId(),
+                NotificationConstant.APPOINTMENT_BOOKED,
+                patientInfo.getEmail(),
+                NotificationConstant.SCHEDULE_APPOINTMENT_SUBJECT
+        );
+
         notificationFeignClient.sendMail(emailInfo);
-        logger.info("Successfully Sent the mail");
-        return appointmentId;
+        return appointment.getId();
     }
 
     @Override
-    public Appointment cancelAppointment(Long appointmentId, String reasonForCancellation) throws AppointmentException {
-        logger.info("Started Cancelling the Appointment for appointment id= {}", appointmentId);
-        Appointment appointment = appointmentRepository.findById(appointmentId).orElseThrow(() ->
-                new AppointmentException(AppointmentConstant.APPOINTMENT_NOT_FOUND));
-        if (appointment.getStatus().equals(Status.CANCEL)) {
-            throw new AppointmentException(AppointmentConstant.APPOINTMENT_ALREADY_CANCELLED);
+    public Appointment cancelAppointment(Long appointmentId, String reason) throws AppointmentException {
+
+        Appointment appointment = appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new AppointmentException("Not found"));
+
+        if (appointment.getStatus() == Status.CANCELLED) {
+            throw new AppointmentException("Already cancelled");
         }
-        appointment.setReason(reasonForCancellation);
-        appointment.setStatus(Status.CANCEL);
-        logger.info("Successfully Cancelled the appointment ->  Started Triggering Mail");
 
-        // To-Do : Use kafka to Send Mails
-        PatientDTO patientInfo = profileFeignClient.getPatientById(appointment.getPatientId());
-        logger.info("Patient Info Fetched with Patient id = {}", patientInfo.getId());
-        EmailDTO emailInfo = notificationServiceHelper.getNotificationDetails(appointment.getPatientId(),
-                NotificationConstant.APPOINTMENT_CANCELLED, patientInfo.getEmail(), NotificationConstant.CANCEL_APPOINTMENT_SUBJECT);
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime appointmentTime = LocalDateTime.of(
+                appointment.getAppointmentDate(),
+                appointment.getStartTime()
+        );
 
-        logger.info("Started Sending mail To Patient");
-        notificationFeignClient.sendMail(emailInfo);
-        logger.info("Successfully Sended the mail");
+        long minutesDiff = Duration.between(now, appointmentTime).toMinutes();
 
-        return appointment;
+        if (minutesDiff >= 60&& appointment.getPaid() != null && appointment.getPaid()) {
+            // REFUND ALLOWED
+            appointment.setRefunded(true);
+            processRefund(appointment);
+        }
+
+        appointment.setStatus(Status.CANCELLED);
+        appointment.setReason(reason);
+
+        return appointmentRepository.save(appointment);
     }
 
     @Override
@@ -102,24 +154,35 @@ public class AppointmentServiceImpl implements AppointmentService {
     }
 
     @Override
-    public Appointment rescheduleAppointment(Long appointmentId, LocalDateTime newDateAndTime, String reasonForReschedule) throws AppointmentException {
-        logger.info("Started Rescheduling Appointment for AppointmenId = {}", appointmentId);
-        Appointment appointment = appointmentRepository.findById(appointmentId).orElseThrow(() ->
-                new AppointmentException(AppointmentConstant.APPOINTMENT_NOT_FOUND));
-        appointment.setReason(reasonForReschedule);
-        appointment.setAppointmentDate(newDateAndTime);
-        logger.info("Appointment Rescheudle for Appointment Id = {}, to ={}", appointmentId, newDateAndTime);
+    public Appointment rescheduleAppointment(Long appointmentId,
+                                             LocalDate date,
+                                             LocalTime startTime,
+                                             String reason) throws AppointmentException {
 
-        // To-Do : Use kafka to Send Mails
-        PatientDTO patientInfo = profileFeignClient.getPatientById(appointment.getPatientId());
-        EmailDTO emailInfo = notificationServiceHelper.getNotificationDetails(appointment.getPatientId(), NotificationConstant.APPOINTMENT_RESCHEDULED,
-                patientInfo.getEmail(), NotificationConstant.APPOINTMENT_RESCHEDULED_SUBJECT);
+        Appointment appointment = appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new AppointmentException(AppointmentConstant.APPOINTMENT_NOT_FOUND));
 
-        logger.info("Started Sending mail To Patient");
-        notificationFeignClient.sendMail(emailInfo);
-        logger.info("Successfully Sended the mail");
+        LocalTime endTime = startTime.plusMinutes(15);
 
-        return appointment;
+        //  SLOT CHECK
+        boolean exists = appointmentRepository
+                .existsByDoctorIdAndAppointmentDateAndStartTimeAndStatus(
+                        appointment.getDoctorId(),
+                        date,
+                        startTime,
+                        Status.SCHEDULED
+                );
+
+        if (exists) {
+            throw new AppointmentException("Slot already booked");
+        }
+
+        appointment.setAppointmentDate(date);
+        appointment.setStartTime(startTime);
+        appointment.setEndTime(endTime);
+        appointment.setReason(reason);
+
+        return appointmentRepository.save(appointment);
     }
 
     @Override
@@ -134,11 +197,16 @@ public class AppointmentServiceImpl implements AppointmentService {
     @Override
     public Boolean publishMessage(String message) {
         logger.info("Stared Sending Message to Topic = {} ", AppointmentConstant.KAFKA_TEST_TOPIC);
-        // Printing Message in case of Failure
-//        logger.info("Messgae = {}",message);
         kafkaTemplate.send(AppointmentConstant.KAFKA_TEST_TOPIC, message);
         logger.info("Message Sent Successfully ");
         return true;
+    }
+
+    @Override
+    public List<AppointmentDTO> getAllAppointments() throws AppointmentException {
+        logger.info("Trying to fetch details all appointments");
+        return appointmentRepository.findAll().stream()
+                .map(Appointment::toDTO).toList();
     }
 
     @Override
@@ -150,6 +218,76 @@ public class AppointmentServiceImpl implements AppointmentService {
         logger.info("Doctor details fetched");
         PatientDTO patientDTO = profileFeignClient.getPatientById(appointment.getPatientId());
         logger.info("Patient details fetched! Ready to show data");
-        return new AppointmentDetails(appointment.getId(), appointment.getPatientId(), appointment.getDoctorId(), doctorDTO.getName(), patientDTO.getName(), appointment.getAppointmentDate(), appointment.getStatus(), appointment.getReason(), appointment.getNotes());
+        return new AppointmentDetails(appointment.getId(), appointment.getPatientId(), appointment.getDoctorId(), doctorDTO.getName(), patientDTO.getName(), appointment.getAppointmentDate(),appointment.getStartTime(),appointment.getEndTime(), appointment.getStatus(), appointment.getReason(),appointment.getPaid(), appointment.getNotes());
     }
+
+    @Override
+    public List<AppointmentDTO> getAppointmentsByDoctorId(Long doctorId) throws AppointmentException {
+        logger.info("Trying to fetch details for appointment with doctorId={}", doctorId);
+        return appointmentRepository.findByDoctorId(doctorId).stream()
+                .map(Appointment::toDTO).toList();
+    }
+
+    @Override
+    public List<AppointmentDTO> getAppointmentsByPatientId(Long patientId) throws AppointmentException {
+        logger.info("Trying to fetch details for appointment with patientId={}", patientId);
+        return appointmentRepository.findByPatientId(patientId).stream()
+                .map(Appointment::toDTO).toList();
+    }
+
+    @Override
+    public List<SlotDTO> getSlots(Long doctorId, LocalDate date) {
+
+        List<Appointment> booked =
+                appointmentRepository.findByDoctorIdAndAppointmentDateAndStatus(
+                        doctorId, date, Status.SCHEDULED
+                );
+
+        Set<LocalTime> bookedTimes = booked.stream()
+                .map(Appointment::getStartTime)
+                .collect(Collectors.toSet());
+
+        List<SlotDTO> slots = new ArrayList<>();
+
+        generateSlots(LocalTime.of(9,0), LocalTime.of(13,0), bookedTimes, slots);
+        generateSlots(LocalTime.of(17,0), LocalTime.of(21,0), bookedTimes, slots);
+
+        return slots;
+    }
+
+    @Override
+    public void generateSlots(LocalTime start, LocalTime end,
+                              Set<LocalTime> bookedTimes,
+                              List<SlotDTO> slots) {
+
+        LocalTime current = start;
+
+        while (current.isBefore(end)) {
+            LocalTime next = current.plusMinutes(15);
+
+            SlotDTO s = new SlotDTO();
+            s.setStartTime(current);
+            s.setEndTime(next);
+            s.setBooked(bookedTimes.contains(current));
+
+            slots.add(s);
+
+            current = next;
+        }
+    }
+
+    private void processRefund(Appointment appointment) {
+
+        if (appointment.getPaymentId() == null) {
+            System.out.println("Refund skipped: No paymentId");
+            return;
+        }
+
+        System.out.println("Refund processed for appointment: " + appointment.getId());
+
+        // TODO: Razorpay refund later
+
+        appointment.setRefunded(true);
+    }
+
 }
