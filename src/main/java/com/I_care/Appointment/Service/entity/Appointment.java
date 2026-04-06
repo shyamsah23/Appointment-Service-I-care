@@ -4,14 +4,17 @@ import com.I_care.Appointment.Service.dto.AppointmentDTO;
 import com.I_care.Appointment.Service.enums.Status;
 import jakarta.persistence.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 @Entity
 @Table(
-        name = "Appointment",
+        name = "appointment",
         uniqueConstraints = {
-                @UniqueConstraint(columnNames = {"doctorId", "patientId", "appointmentDate"})
+                @UniqueConstraint(columnNames = {"doctorId", "appointmentDate", "startTime"})
         }
+
 )
 public class Appointment {
     @Id
@@ -19,19 +22,32 @@ public class Appointment {
     private Long id;
     private Long patientId;
     private Long doctorId;
-    private LocalDateTime appointmentDate;
+    private LocalDate appointmentDate;
+    private LocalTime startTime;
+    private LocalTime endTime;
+    @Enumerated(EnumType.STRING)
     private Status status;
     private String reason;
+    private Boolean paid;
     private String notes;
+    private String paymentId; // razorpayPaymentId
+    private Double amount;  // consultation fee
+    private Boolean refunded = false;
 
-    public Appointment(Long id, Long patientId, Long doctorId, LocalDateTime appointmentDate, Status status, String reason, String notes) {
+    public Appointment(Long id, Long patientId, Long doctorId, LocalDate appointmentDate, LocalTime startTime, LocalTime endTime, Status status, String reason, Boolean paid, String notes, String paymentId, Double amount, Boolean refunded) {
         this.id = id;
         this.patientId = patientId;
         this.doctorId = doctorId;
         this.appointmentDate = appointmentDate;
+        this.startTime = startTime;
+        this.endTime = endTime;
         this.status = status;
         this.reason = reason;
+        this.paid = paid;
         this.notes = notes;
+        this.paymentId = paymentId;
+        this.amount = amount;
+        this.refunded = refunded;
     }
 
     public Appointment() {
@@ -65,12 +81,36 @@ public class Appointment {
         this.doctorId = doctorId;
     }
 
-    public LocalDateTime getAppointmentDate() {
+    public LocalDate getAppointmentDate() {
         return appointmentDate;
     }
 
-    public void setAppointmentDate(LocalDateTime appointmentDate) {
+    public void setAppointmentDate(LocalDate appointmentDate) {
         this.appointmentDate = appointmentDate;
+    }
+
+    public LocalTime getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(LocalTime startTime) {
+        this.startTime = startTime;
+    }
+
+    public LocalTime getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(LocalTime endTime) {
+        this.endTime = endTime;
+    }
+
+    public Boolean getPaid() {
+        return paid;
+    }
+
+    public void setPaid(Boolean paid) {
+        this.paid = paid;
     }
 
     public Status getStatus() {
@@ -97,6 +137,30 @@ public class Appointment {
         this.notes = notes;
     }
 
+    public String getPaymentId() {
+        return paymentId;
+    }
+
+    public void setPaymentId(String paymentId) {
+        this.paymentId = paymentId;
+    }
+
+    public Double getAmount() {
+        return amount;
+    }
+
+    public void setAmount(Double amount) {
+        this.amount = amount;
+    }
+
+    public Boolean getRefunded() {
+        return refunded;
+    }
+
+    public void setRefunded(Boolean refunded) {
+        this.refunded = refunded;
+    }
+
     @Override
     public String toString() {
         return "Appointment{" +
@@ -107,10 +171,13 @@ public class Appointment {
                 ", status=" + status +
                 ", reason='" + reason + '\'' +
                 ", notes='" + notes + '\'' +
+                ", paymentId='" + paymentId + '\'' +
+                ", amount='" + amount + '\'' +
+                ", refunded='" + refunded + '\'' +
                 '}';
     }
 
     public AppointmentDTO toDTO() {
-        return new AppointmentDTO(this.id, this.patientId, this.doctorId, this.appointmentDate, this.status, this.reason, this.notes);
+        return new AppointmentDTO(this.id, this.patientId, this.doctorId, this.appointmentDate, this.startTime,this.endTime, this.status, this.reason,this.paid, this.notes,this.paymentId,this.amount,this.refunded);
     }
 }
